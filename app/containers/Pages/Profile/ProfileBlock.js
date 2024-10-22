@@ -63,7 +63,7 @@ class ProfileBlock extends React.Component {
                 localStorage.clear();
             }
         }).catch(err => {
-            console.log(err.response ? err.response.data.errors.message : '');
+            // console.log(err.response ? err.response.data.errors.message : '');
         });
     };
 
@@ -81,7 +81,7 @@ class ProfileBlock extends React.Component {
                 });
             }
         }).catch(err => {
-            console.log(err.response ? err.response.data.errors.message : '');
+            // console.log(err.response ? err.response.data.errors.message : '');
         });
     };
 
@@ -175,10 +175,10 @@ class ProfileBlock extends React.Component {
                 </Grid>
                 <div align="center">
                     <br />
-                    <Button variant="contained" color="info" type="button" onClick={this.handleDeleteConfirmation}>
+                    <Button variant="contained" color="info" type="button" disabled onClick={this.handleDeleteConfirmation}>
                         Delete Account
                     </Button>
-                    {'      '}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Button variant="contained" color="primary" type="button" onClick={this.handleSave}>
                         Save
                     </Button>

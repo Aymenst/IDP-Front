@@ -99,15 +99,12 @@ class BlankPage extends React.Component {
                         filter: true,
                         customBodyRender: (value) => {
                                 if (value) {
-                                        // Decode base64 string
                                         const byteCharacters = atob(value);
                                         const byteNumbers = new Array(byteCharacters.length);
                                         for (let i = 0; i < byteCharacters.length; i++) {
                                           byteNumbers[i] = byteCharacters.charCodeAt(i);
                                         }
                                         const byteArray = new Uint8Array(byteNumbers);
-
-                                        // Create a Blob from the byte array
                                         const blob = new Blob([byteArray], { type: 'image/png' });
                                         const url = URL.createObjectURL(blob);
 
@@ -125,18 +122,14 @@ class BlankPage extends React.Component {
                         filter: true,
                         customBodyRender: (value) => {
                                 if (value) {
-                                        // Decode base64 string
                                         const byteCharacters = atob(value);
                                         const byteNumbers = new Array(byteCharacters.length);
                                         for (let i = 0; i < byteCharacters.length; i++) {
                                           byteNumbers[i] = byteCharacters.charCodeAt(i);
                                         }
                                         const byteArray = new Uint8Array(byteNumbers);
-
-                                        // Create a Blob from the byte array
                                         const blob = new Blob([byteArray], { type: 'image/png' });
                                         const url = URL.createObjectURL(blob);
-
                                         return <a href={url} download="tampon.png" target="_blank" rel="noopener noreferrer">View Tampon</a>;
                                       } else {
                                         return 'No image';
@@ -151,18 +144,14 @@ class BlankPage extends React.Component {
                         filter: true,
                         customBodyRender: (value) => {
                                 if (value) {
-                                        // Decode base64 string
                                         const byteCharacters = atob(value);
                                         const byteNumbers = new Array(byteCharacters.length);
                                         for (let i = 0; i < byteCharacters.length; i++) {
                                           byteNumbers[i] = byteCharacters.charCodeAt(i);
                                         }
                                         const byteArray = new Uint8Array(byteNumbers);
-
-                                        // Create a Blob from the byte array
                                         const blob = new Blob([byteArray], { type: 'image/png' });
                                         const url = URL.createObjectURL(blob);
-
                                         return <a href={url} download="tampon.png" target="_blank" rel="noopener noreferrer">View Tampon</a>;
                                       } else {
                                         return 'No image';
@@ -352,7 +341,6 @@ class BlankPage extends React.Component {
         // TODO Generalize this on all the pages
         const title = brand.name;
         const description = brand.desc;
-        console.log(this.state);
         return (
             <div>
                 <Helmet>

@@ -19,24 +19,16 @@ import {
     MenuItem,
     Typography,
     Snackbar,
-    IconButton
 } from '@material-ui/core';
-import SendIcon from "@material-ui/icons/Send";
 import MuiAlert from "@material-ui/lab/Alert";
 import withStyles from '@material-ui/core/styles/withStyles';
 import GeneralTable from '../GenralTables/GeneralTable';
 import { PropTypes } from 'prop-types';
-import Tooltip from "@material-ui/core/Tooltip";
-import UserService from "../../Services/UserService";
 import DataService from "../../Services/DataService";
 import ProfileService from "../../Services/ProfileService";
 import axios from "axios";
-import {API} from "../../../config/apiUrl";
 import PDFViewer from 'pdf-viewer-reactjs'
-
-import {
-    DataTable, PapperBlock
-} from 'dan-components';
+import { PapperBlock } from 'dan-components';
 
 
 const styles = {
@@ -61,7 +53,6 @@ class BlankPage extends React.Component {
             activeStep: 0,
             skipped: new Set(),
             pdfUrl: '',
-            pdfUrl2: '',
             profileId: '',
             dataId: '',
             entryId: '',
@@ -83,7 +74,6 @@ class BlankPage extends React.Component {
             licenseFrontUrl: '',
             licenseBackUrl: '',
             signatureUrl: '',
-            record: '',
             message: '',
             profiles: [],
             data: [],
@@ -94,11 +84,11 @@ class BlankPage extends React.Component {
             open: false,
             showPDF: false,
             openNotif: false,
-            openWarning: false,
             openPopUp: false,
             edit: false,
-            fetch: false,
             success: false,
+            loading: false,
+            loading2: false,
             columns: [
                     {
                       label: 'Entry Id',
@@ -265,28 +255,8 @@ class BlankPage extends React.Component {
     }
 
     componentWillReceiveProps(props) {
-        console.log(props);
+        // console.log(props);
     }
-
-    handleSubmit = () => {
-            const { entryId, name, email, country, eyeColor, height, dateOfBirth, address, shippingAddress, shippingMethod, un,
-             idpValidity, total, phone, selfieUrl, licenseFrontUrl, licenseBackUrl, signatureUrl } = this.state;
-
-            const Data = {
-                  entryId, name, email, country, eyeColor, height, dateOfBirth, address, shippingAddress, shippingMethod, un,
-                    idpValidity, total, phone, selfieUrl, licenseFrontUrl, licenseBackUrl, signatureUrl
-            };
-        DataService.saveRequest(Data).then(row => {
-            if (row.status === 200) {
-                    DataService.getRequest().then(row => {
-                         if (row.status === 200) this.setState({ data: row?.data });
-                    });
-                this.setState({ openPopUp: false, severity: 'success', message: 'Data added successfully', openNotif: true });
-            }
-        }).catch(err => {
-            this.setState({ openNotif: true, severity: 'error', message: err.response ? err.response.data.errors.message : '' });
-        });
-    };
 
     handlePreviewData = (data) => {
         this.setState({
@@ -344,7 +314,7 @@ class BlankPage extends React.Component {
     };
 
     handleClose = () => {
-        this.setState({ openPopUp: false, openWarning: false, open: false, showPDF: false, activeStep: 0, skipped: new Set(), pdfUrl: '' });
+        this.setState({ openPopUp: false, open: false, showPDF: false, activeStep: 0, skipped: new Set(), pdfUrl: '' });
     };
 
     handleChange = (ev) => {
@@ -355,10 +325,6 @@ class BlankPage extends React.Component {
         if (reason === 'clickaway') return;
         this.setState({ openNotif: false });
     };
-
-    isStepOptional = (step) => {
-        return step === 1;
-      };
 
     isStepSkipped = (step) => {
         return this.state.skipped.has(step);
@@ -393,16 +359,6 @@ class BlankPage extends React.Component {
         this.setState({ pageNumber: page });
     };
 
-    handleZoomIn = () => {
-        this.setState((prevState) => ({ zoom: prevState.zoom + 0.1 }));
-    };
-
-    handleZoomOut = () => {
-        this.setState((prevState) => ({
-          zoom: prevState.zoom > 0.1 ? prevState.zoom - 0.1 : 0.1,
-        }));
-    };
-
     handleDocumentLoadError = (error) => {
         this.setState({ error: "Could not load the PDF document. Please try again." });
     };
@@ -422,7 +378,6 @@ class BlankPage extends React.Component {
             .then(response => {
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 if (response.status === 200) {
-                    // Create a URL for the blob and trigger the download
                     const url = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
@@ -431,7 +386,6 @@ class BlankPage extends React.Component {
                     link.click();
                     link.remove();
 
-                    // Optionally, release the blob URL after the download
                     window.URL.revokeObjectURL(url);
                 }
             })
@@ -443,19 +397,20 @@ class BlankPage extends React.Component {
 
     generateLicence = () => {
         const { profileId, dataId } = this.state;
+        this.setState({ loading: true });
         DataService.getPdf(dataId, profileId).then(result => {
-            console.log(result);
-            if(result?.status === 200 ) this.setState({ showPDF: true, pdfUrl: result?.data })
+            if(result?.status === 200 ) this.setState({ showPDF: true, loading: false, pdfUrl: result?.data })
         });
     };
 
     sendEmail = () => {
         const { dataId, email } = this.state;
+        this.setState({ loading2: true });
         DataService.sendEmail(dataId, email).then(result => {
             if(result?.status === 200 ) {
                 const untreated = result?.data.filter(item => !item.treated);
                 const treated = result?.data.filter(item => item.treated);
-                this.setState({ open: false, showPDF: false, activeStep: 0, skipped: new Set(), pdfUrl: '', data: untreated,
+                this.setState({ open: false, showPDF: false, activeStep: 0, skipped: new Set(), pdfUrl: '', data: untreated, loading2: false,
                             dataFiltred: treated, severity: 'success', message: 'Email sent successfully', openNotif: true });
             }
         }).catch(err => {
@@ -464,13 +419,12 @@ class BlankPage extends React.Component {
     };
 
     render() {
-        const { classes, location } = this.props;
+        const { classes } = this.props;
         const { message, data, dataFiltred, columns, entryId, name, email, country, eyeColor, height, dateOfBirth, address, openPopUp, edit, openNotif, severity, profiles, profileId, pageNumber, zoom, error,
-         shippingAddress, shippingMethod, un, idpValidity, total, phone, selfieUrl, licenseFrontUrl, licenseBackUrl, signatureUrl, columns2, open, activeStep, showPDF, pdfUrl } = this.state;
+         shippingAddress, shippingMethod, un, idpValidity, total, phone, selfieUrl, licenseFrontUrl, licenseBackUrl, signatureUrl, loading, loading2, open, activeStep, showPDF, pdfUrl } = this.state;
         // TODO Generalize this on all the pages
         const title = brand.name;
         const description = brand.desc;
-        console.log(this.state);
         return (
             <div>
                 <Helmet>
@@ -886,6 +840,11 @@ class BlankPage extends React.Component {
                                                    </Button>
                                                 </Grid>
                                                 <Grid item xs={12} md={5} />
+                                                <Grid item xs={12} md={5} />
+                                                <Grid item xs={12} md={2}>
+                                                     {loading && <div style={{ color: 'black' }}>Loading...</div>}
+                                                </Grid>
+                                                <Grid item xs={12} md={5} />
                                                 {showPDF ? (
                                                     <Grid container
                                                        spacing={2}
@@ -975,6 +934,11 @@ class BlankPage extends React.Component {
                                             >
                                                Send Email
                                             </Button>
+                                          </Grid>
+                                          <Grid item xs={12} md={5} />
+                                          <Grid item xs={12} md={5} />
+                                          <Grid item xs={12} md={2}>
+                                              {loading2 && <div style={{ color: 'black' }}>Sending Email...</div>}
                                           </Grid>
                                           <Grid item xs={12} md={5} />
                                         </Grid>

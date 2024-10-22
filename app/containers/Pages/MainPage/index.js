@@ -10,20 +10,17 @@ import {
     Box,
     TextField,
     DialogActions,
-    Typography,
-    Snackbar
+    Snackbar, InputLabel, Select, MenuItem, FormControl, Checkbox
 } from '@material-ui/core';
 import MuiAlert from "@material-ui/lab/Alert";
 import withStyles from '@material-ui/core/styles/withStyles';
 import GeneralTable from '../GenralTables/GeneralTable';
 import { PropTypes } from 'prop-types';
-import UserService from "../../Services/UserService";
 import DataService from "../../Services/DataService";
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Remove';
 
-
-const SOCKET_URL = 'http://localhost:9000/ws-message/';
 const styles = {
     gridSizing: {
         marginBottom: '4%'
@@ -47,6 +44,7 @@ class BlankPage extends React.Component {
             country: '',
             eyeColor: '',
             height: '',
+            licenseClass: '',
             dateOfBirth: '',
             address: '',
             shippingAddress: '',
@@ -224,7 +222,7 @@ class BlankPage extends React.Component {
     }
 
     worker () {
-        self.addEventListener('message', e => { // eslint-disable-line no-restricted-globals
+        self.addEventListener('message', e => {
           if (!e) return;
           setInterval(() => {
                 // postMessage(seconds);
@@ -238,14 +236,6 @@ class BlankPage extends React.Component {
       }
 
     componentDidMount() {
-        const user = localStorage.getItem('user').toString();
-        const id = user.slice(7, 31);
-        UserService.getUsers().then(response => {
-            response.data.map(row => {
-                if (row.id === id) this.setState({ currentUser: row });
-            });
-            this.setState({ users: response.data, fetch: true });
-        });
         DataService.getRequest().then(row => {
              if (row.status === 200) this.setState({ data: row?.data });
         });
@@ -255,7 +245,6 @@ class BlankPage extends React.Component {
 
     updateClock = ()=>{
         this.clock.addEventListener('message', event => {
-          console.log(event);
         });
     };
 
@@ -264,7 +253,7 @@ class BlankPage extends React.Component {
     }
 
     componentWillReceiveProps(props) {
-        console.log(props);
+       // console.log(props);
     }
 
     handleSubmit = () => {
@@ -280,7 +269,6 @@ class BlankPage extends React.Component {
                     DataService.getRequest().then(row => {
                          if (row.status === 200) this.setState({ data: row?.data });
                     });
-                console.log("zeb");
                 this.setState({ openPopUp: false, severity: 'success', message: 'Data added successfully', openNotif: true });
             }
         }).catch(err => {
@@ -289,13 +277,11 @@ class BlankPage extends React.Component {
     };
 
     handleEditData = (data) => {
-       console.log(data);
         const parts = data[0].dateOfBirth.split("/");
         const month = String(parts[0]).padStart(2, '0');
         const day = String(parts[1]).padStart(2, '0');
         const year = parts[2];
         const formattedDate = `${year}-${month}-${day}`;
-        console.log(formattedDate);
         this.setState({
            entryId: data[0].entryId,
            name: data[0].name,
@@ -312,7 +298,6 @@ class BlankPage extends React.Component {
            total: data[0].total,
            phone: data[0].phone,
            selfieUrl: data[0].selfieUrl,
-           licenseClass: data[0].licenseClass,
            licenseFrontUrl: data[0].licenseFrontUrl,
            licenseBackUrl: data[0].licenseBackUrl,
            signatureUrl: data[0].signatureUrl,
@@ -323,7 +308,6 @@ class BlankPage extends React.Component {
     };
 
     handlePreviewData = (data) => {
-        console.log(data);
         const parts = data[0].dateOfBirth.split("/");
         const month = String(parts[0]).padStart(2, '0');
         const day = String(parts[1]).padStart(2, '0');
@@ -345,7 +329,6 @@ class BlankPage extends React.Component {
             total: data[0].total,
             phone: data[0].phone,
             selfieUrl: data[0].selfieUrl,
-            licenseClass: data[0].licenseClass,
             licenseFrontUrl: data[0].licenseFrontUrl,
             licenseBackUrl: data[0].licenseBackUrl,
             signatureUrl: data[0].signatureUrl,
@@ -362,12 +345,26 @@ class BlankPage extends React.Component {
         this.setState({ idpValidity: newIdpValidity });
     };
     
+    handleDecrease = () => {
+        const { idpValidity } = this.state;
+        const date = new Date(idpValidity);
+        date.setFullYear(date.getFullYear() - 1);
+        const newIdpValidity = date.toISOString().split('T')[0];
+        this.setState({ idpValidity: newIdpValidity });
+    };
+    
     handleClose = () => {
         this.setState({ openPopUp: false, openWarning: false });
     };
 
     handleChange = (ev) => {
         this.setState({ [ev.target.name]: ev.target.value });
+    };
+
+    handleChangeLicence= (event) => {
+        const valueArray = event.target.value;
+        const valueString = valueArray.join(', ');
+        this.setState({  licenseClass: valueString });
     };
 
     handleCloseSnack = (event, reason) => {
@@ -382,7 +379,15 @@ class BlankPage extends React.Component {
         // TODO Generalize this on all the pages
         const title = brand.name;
         const description = brand.desc;
-        console.log(this.state);
+        const selectedLicenses = licenseClass ? licenseClass.split(', ') : [];
+        const licences = [
+            { value: 'A', name: 'licence A' },
+            { value: 'B', name: 'licence B' },
+            { value: 'C', name: 'licence C' },
+            { value: 'D', name: 'licence D' },
+            { value: 'E', name: 'licence E' }
+        ];
+        
         return (
             <div>
                 <Helmet>
@@ -461,21 +466,23 @@ class BlankPage extends React.Component {
                           justify="center"
                       >
                         <Grid item xs={12} md={2} />
-                        <Grid item xs={12} md={2}>
-                           <TextField
-                               id="entryId"
-                               label="Entry Id"
-                               variant="outlined"
-                               name="entryId"
-                               value={entryId}
-                               type="number"
-                               required
-                               fullWidth
-                               onChange={this.handleChange}
-                               InputProps={{ readOnly: !edit }}
-                           />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
+                          <Grid item xs={12} md={2}>
+                              <br/>
+                              <TextField
+                                  id="entryId"
+                                  label="Entry Id"
+                                  variant="outlined"
+                                  name="entryId"
+                                  value={entryId}
+                                  type="number"
+                                  required
+                                  fullWidth
+                                  onChange={this.handleChange}
+                                  InputProps={{readOnly: !edit}}
+                              />
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <br />
                           <TextField
                               id="name"
                               label="Name"
@@ -488,21 +495,30 @@ class BlankPage extends React.Component {
                               InputProps={{ readOnly: !edit }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={2}>
-                          <TextField
-                              id="name"
-                              label="licence Class"
-                              variant="outlined"
-                              name="licenseClass"
-                              value={licenseClass}
-                              required
-                              fullWidth
-                              onChange={this.handleChange}
-                              InputProps={{ readOnly: !edit }}
-                              InputLabelProps={{ shrink: true }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} md={2} />
+                          <Grid item xs={12} md={2}>
+                              <FormControl fullWidth required>
+                                  <InputLabel>Select License</InputLabel>
+                                  <Select
+                                      name="licenseClass"
+                                      multiple
+                                      value={selectedLicenses}
+                                      onChange={this.handleChangeLicence}
+                                      renderValue={(selected) => selected.join(', ')}
+                                      inputProps={{readOnly: !edit}}
+                                      InputLabelProps={{shrink: true}}
+                                  >
+                                      {licences.map((clt) => (
+                                          <MenuItem key={clt.value} value={clt.value}>
+                                              <Checkbox
+                                                  checked={selectedLicenses.indexOf(clt.value) > -1}
+                                              />
+                                              {clt.name}
+                                          </MenuItem>
+                                      ))}
+                                  </Select>
+                              </FormControl>
+                          </Grid>
+                          <Grid item xs={12} md={2} />
                         <Grid item xs={12} md={5}>
                           <TextField
                               id="email"
@@ -634,7 +650,7 @@ class BlankPage extends React.Component {
                               InputProps={{ readOnly: !edit }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <TextField
                               id="idpValidity"
                               label="IDP Validity"
@@ -649,8 +665,13 @@ class BlankPage extends React.Component {
                           />
                         </Grid>
                           <Grid item xs={12} md={1}>
-                              <IconButton onClick={() => this.handleIncrease()}>
+                              <IconButton disabled={!edit} onClick={() => this.handleIncrease()}>
                                   <AddIcon color="primary" />
+                              </IconButton>
+                          </Grid>
+                          <Grid item xs={12} md={1}>
+                              <IconButton color={"primary"} disabled={!edit} onClick={() => this.handleDecrease()}>
+                                  <DeleteIcon color="secondary" />
                               </IconButton>
                           </Grid>
                         <Grid item xs={12} md={5}>
