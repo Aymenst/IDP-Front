@@ -11,22 +11,15 @@ import {
     TextField,
     DialogActions,
     Typography,
-    Snackbar,
-    IconButton
+    Snackbar
 } from '@material-ui/core';
-import SendIcon from "@material-ui/icons/Send";
 import MuiAlert from "@material-ui/lab/Alert";
 import withStyles from '@material-ui/core/styles/withStyles';
 import GeneralTable from '../GenralTables/GeneralTable';
 import { PropTypes } from 'prop-types';
-import Tooltip from "@material-ui/core/Tooltip";
 import UserService from "../../Services/UserService";
 import ProfileService from "../../Services/ProfileService";
-import axios from "axios";
-import {API} from "../../../config/apiUrl";
-import {
-    DataTable, PapperBlock
-} from 'dan-components';
+import { PapperBlock } from 'dan-components';
 
 const styles = {
     gridSizing: {

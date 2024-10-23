@@ -2,7 +2,7 @@ import avatarApi from '../images/avatars';
 
 const dummyContents = {
   user: {
-    name: 'aymen',
+    name: 'Soufiane',
     title: 'Administrator',
     avatar: avatarApi[7],
     status: 'online'

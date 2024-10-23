@@ -16,7 +16,6 @@ import {
   Profile,
   Template
 } from '../pageListAsync';
-import { getClients } from '../../redux/actions/clients';
 
 let user = 'Anonymous';
 

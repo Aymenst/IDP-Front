@@ -1,2 +1,2 @@
-# Trading-frontend
-Bright share finance client-side app 
+# IDP-Frontend
+client-side app 

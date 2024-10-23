@@ -5,21 +5,15 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl,
     Grid,
-    InputLabel, MenuItem,
-    Select,
     TextField,
     Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { connect } from 'react-redux';
-import Box from '@material-ui/core/Box';
 import UserService from "../../Services/UserService";
 import {withRouter} from "react-router-dom";
 
 const useStyles = makeStyles();
-const FilterDialogFooter = () => <Box width={420} />;
 
 class ProfileBlock extends React.Component {
     constructor(props) {
