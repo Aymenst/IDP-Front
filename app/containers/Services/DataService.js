@@ -8,7 +8,7 @@ class DataService {
 
     getPdf = (id1, id2) => axios.post(`${API}/data/getPdf/${id1}/${id2}`);
 
-    sendEmail = (id1, email) => axios.post(`${API}/data/sendEmail/${id1}/${email}`);
+    sendEmail = (id1, email, profileId) => axios.post(`${API}/data/sendEmail/${id1}/${email}/${profileId}`);
 
     getLastRegister = () => axios.get(`${API}/data/last`);
 

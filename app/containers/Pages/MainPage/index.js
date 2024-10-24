@@ -231,9 +231,9 @@ class BlankPage extends React.Component {
                   this.setState({ data: row?.data, fetch: true });
                 });
               },
-              9000000); //900000 //50000
+              120000); //1 min *60000 //50000
         })
-      }
+    }
 
     componentDidMount() {
         DataService.getRequest().then(row => {

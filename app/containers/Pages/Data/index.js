@@ -404,9 +404,9 @@ class BlankPage extends React.Component {
     };
 
     sendEmail = () => {
-        const { dataId, email } = this.state;
+        const { dataId, email, profileId } = this.state;
         this.setState({ loading2: true });
-        DataService.sendEmail(dataId, email).then(result => {
+        DataService.sendEmail(dataId, email, profileId).then(result => {
             if(result?.status === 200 ) {
                 const untreated = result?.data.filter(item => !item.treated);
                 const treated = result?.data.filter(item => item.treated);
